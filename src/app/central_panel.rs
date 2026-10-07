@@ -1180,7 +1180,7 @@ impl FerriteApp {
                                     .unwrap_or(0.5);
                                 let available_width = ui.available_width();
                                 let _available_height = ui.available_height(); // For reference (using rect-based layout)
-                                let splitter_width = 8.0; // Width of the draggable splitter area
+                                let splitter_width = self.state.settings.panel_spacing.value(); // Width of the draggable splitter area
 
                                 // Get Zen Mode settings
                                 let zen_max_column_width = self.state.settings.zen_max_column_width;
@@ -1243,6 +1243,9 @@ impl FerriteApp {
 
                                 // Get header spacing setting (Markdown rendering)
                                 let header_spacing = self.state.settings.header_spacing;
+
+                                // Get line spacing setting (Markdown rendering)
+                                let line_spacing = self.state.settings.line_spacing;
 
                                 // Get path for syntax highlighting
                                 let tab_path_for_syntax = self.state
@@ -1901,6 +1904,7 @@ impl FerriteApp {
                                             .zen_mode(zen_mode, zen_max_column_width)
                                             .paragraph_indent(paragraph_indent)
                                             .header_spacing(header_spacing)
+                                            .line_spacing(line_spacing)
                                             .wikilink_context(wl_ctx)
                                             .code_execution(code_exec)
                                             .source_epoch(source_epoch)
@@ -2211,6 +2215,7 @@ impl FerriteApp {
                                 let zen_max_column_width = self.state.settings.zen_max_column_width;
                                 let paragraph_indent = self.state.settings.paragraph_indent;
                                 let header_spacing = self.state.settings.header_spacing;
+                                let line_spacing = self.state.settings.line_spacing;
                                 let accent_rgb = self.state.settings.accent_color;
 
                                 // Collect workspace root before mutable borrow
@@ -2266,6 +2271,7 @@ impl FerriteApp {
                                         .zen_mode(zen_mode, zen_max_column_width)
                                         .paragraph_indent(paragraph_indent)
                                         .header_spacing(header_spacing)
+                                        .line_spacing(line_spacing)
                                         .wikilink_context(wl_ctx)
                                         .code_execution(code_exec)
                                         .source_epoch(source_epoch)

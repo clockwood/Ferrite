@@ -5,8 +5,8 @@
 
 use crate::config::{
     CjkFontPreference, EditorFont, HeaderSpacing, KeyBinding, KeyCode, KeyModifiers,
-    KeyboardShortcuts, Language, MaxLineWidth, MinimapMode, Settings, ShortcutCommand, Theme,
-    ViewMode,
+    KeyboardShortcuts, Language, LineSpacing, MaxLineWidth, MinimapMode, PanelSpacing, Settings,
+    ShortcutCommand, Theme, ViewMode,
 };
 use crate::fonts;
 use crate::markdown::syntax::get_available_themes;
@@ -2010,6 +2010,130 @@ impl SettingsPanel {
 
         ui.label(
             RichText::new(t!("settings.editor.header_spacing_hint"))
+                .weak()
+                .small(),
+        );
+
+        ui.add_space(12.0);
+        ui.separator();
+        ui.add_space(8.0);
+
+        // Panel Spacing (Split View)
+        ui.horizontal(|ui| {
+            ui.label(RichText::new(t!("settings.editor.panel_spacing")).strong());
+            ui.add_space(8.0);
+
+            let current_display = settings.panel_spacing.display_name();
+            egui::ComboBox::from_id_salt("panel_spacing_combo")
+                .selected_text(current_display)
+                .width(100.0)
+                .show_ui(ui, |ui| {
+                    for preset in PanelSpacing::presets() {
+                        let label = format!("{} - {}", preset.display_name(), preset.description());
+                        if ui
+                            .selectable_value(&mut settings.panel_spacing, *preset, label)
+                            .changed()
+                        {
+                            changed = true;
+                        }
+                    }
+                    let is_custom = settings.panel_spacing.is_custom();
+                    let custom_label = t!("settings.editor.panel_spacing_custom");
+                    if ui
+                        .selectable_label(
+                            is_custom,
+                            format!(
+                                "{} - {}",
+                                custom_label,
+                                t!("settings.editor.panel_spacing_custom_desc")
+                            ),
+                        )
+                        .clicked()
+                        && !is_custom
+                    {
+                        settings.panel_spacing = PanelSpacing::Custom(16.0);
+                        changed = true;
+                    }
+                });
+
+            // Show inline numeric input when custom is selected
+            if let PanelSpacing::Custom(px) = &mut settings.panel_spacing {
+                let drag = ui.add(
+                    egui::DragValue::new(px)
+                        .speed(1.0)
+                        .clamp_range(4.0..=64.0)
+                        .suffix(" px")
+                );
+                if drag.changed() {
+                    changed = true;
+                }
+            }
+        });
+
+        ui.label(
+            RichText::new(t!("settings.editor.panel_spacing_hint"))
+                .weak()
+                .small(),
+        );
+
+        ui.add_space(12.0);
+        ui.separator();
+        ui.add_space(8.0);
+
+        // Line Spacing (Rendered Preview)
+        ui.horizontal(|ui| {
+            ui.label(RichText::new(t!("settings.editor.line_spacing")).strong());
+            ui.add_space(8.0);
+
+            let current_display = settings.line_spacing.display_name();
+            egui::ComboBox::from_id_salt("line_spacing_combo")
+                .selected_text(current_display)
+                .width(100.0)
+                .show_ui(ui, |ui| {
+                    for preset in LineSpacing::presets() {
+                        let label = format!("{} - {}", preset.display_name(), preset.description());
+                        if ui
+                            .selectable_value(&mut settings.line_spacing, *preset, label)
+                            .changed()
+                        {
+                            changed = true;
+                        }
+                    }
+                    let is_custom = settings.line_spacing.is_custom();
+                    let custom_label = t!("settings.editor.line_spacing_custom");
+                    if ui
+                        .selectable_label(
+                            is_custom,
+                            format!(
+                                "{} - {}",
+                                custom_label,
+                                t!("settings.editor.line_spacing_custom_desc")
+                            ),
+                        )
+                        .clicked()
+                        && !is_custom
+                    {
+                        settings.line_spacing = LineSpacing::Custom(16.0);
+                        changed = true;
+                    }
+                });
+
+            // Show inline numeric input when custom is selected
+            if let LineSpacing::Custom(px) = &mut settings.line_spacing {
+                let drag = ui.add(
+                    egui::DragValue::new(px)
+                        .speed(1.0)
+                        .clamp_range(8.0..=64.0)
+                        .suffix(" px")
+                );
+                if drag.changed() {
+                    changed = true;
+                }
+            }
+        });
+
+        ui.label(
+            RichText::new(t!("settings.editor.line_spacing_hint"))
                 .weak()
                 .small(),
         );

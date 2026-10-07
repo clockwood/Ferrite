@@ -1348,6 +1348,159 @@ impl HeaderSpacing {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Panel Spacing Configuration
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Spacing between editor and preview panes in split view.
+///
+/// Controls the width of the gap (splitter) between the raw editor
+/// and rendered preview panes when using Split view mode.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "lowercase")]
+pub enum PanelSpacing {
+    /// Small spacing - 8px gap
+    Small,
+    /// Medium spacing - 16px gap (default)
+    #[default]
+    Medium,
+    /// Large spacing - 24px gap
+    Large,
+    /// Custom pixel value
+    Custom(f32),
+}
+
+impl PanelSpacing {
+    /// Get the display name for UI.
+    pub fn display_name(&self) -> &'static str {
+        match self {
+            PanelSpacing::Small => "Small",
+            PanelSpacing::Medium => "Medium",
+            PanelSpacing::Large => "Large",
+            PanelSpacing::Custom(_) => "Custom",
+        }
+    }
+
+    /// Get a description of the setting.
+    pub fn description(&self) -> &'static str {
+        match self {
+            PanelSpacing::Small => "8px gap between panes",
+            PanelSpacing::Medium => "16px gap between panes",
+            PanelSpacing::Large => "24px gap between panes",
+            PanelSpacing::Custom(_) => "Custom pixel width",
+        }
+    }
+
+    /// Get all preset options (excludes Custom).
+    pub fn presets() -> &'static [PanelSpacing] {
+        &[
+            PanelSpacing::Small,
+            PanelSpacing::Medium,
+            PanelSpacing::Large,
+        ]
+    }
+
+    /// Get the spacing value in pixels.
+    pub fn value(&self) -> f32 {
+        match self {
+            PanelSpacing::Small => 8.0,
+            PanelSpacing::Medium => 16.0,
+            PanelSpacing::Large => 24.0,
+            PanelSpacing::Custom(px) => *px,
+        }
+    }
+
+    /// Check if this is a custom setting.
+    pub fn is_custom(&self) -> bool {
+        matches!(self, PanelSpacing::Custom(_))
+    }
+
+    /// Get the custom value in pixels, if any.
+    pub fn custom_value(&self) -> Option<f32> {
+        if let PanelSpacing::Custom(px) = self {
+            Some(*px)
+        } else {
+            None
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Line Spacing Configuration
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Line spacing for rendered markdown text.
+///
+/// Controls the vertical spacing between lines of text in the rendered preview.
+/// Affects paragraph trailing space and overall text density.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "lowercase")]
+pub enum LineSpacing {
+    /// Normal spacing - 16px (default)
+    Normal,
+    /// Relaxed spacing - 24px
+    Relaxed,
+    /// Loose spacing - 32px
+    Loose,
+    /// Custom pixel value
+    Custom(f32),
+}
+
+impl LineSpacing {
+    /// Get the display name for UI.
+    pub fn display_name(&self) -> &'static str {
+        match self {
+            LineSpacing::Normal => "Normal",
+            LineSpacing::Relaxed => "Relaxed",
+            LineSpacing::Loose => "Loose",
+            LineSpacing::Custom(_) => "Custom",
+        }
+    }
+
+    /// Get a description of the setting.
+    pub fn description(&self) -> &'static str {
+        match self {
+            LineSpacing::Normal => "16px line spacing",
+            LineSpacing::Relaxed => "24px line spacing",
+            LineSpacing::Loose => "32px line spacing",
+            LineSpacing::Custom(_) => "Custom pixel value",
+        }
+    }
+
+    /// Get all preset options (excludes Custom).
+    pub fn presets() -> &'static [LineSpacing] {
+        &[
+            LineSpacing::Normal,
+            LineSpacing::Relaxed,
+            LineSpacing::Loose,
+        ]
+    }
+
+    /// Get the spacing value in pixels.
+    pub fn value(&self) -> f32 {
+        match self {
+            LineSpacing::Normal => 16.0,
+            LineSpacing::Relaxed => 24.0,
+            LineSpacing::Loose => 32.0,
+            LineSpacing::Custom(px) => *px,
+        }
+    }
+
+    /// Check if this is a custom setting.
+    pub fn is_custom(&self) -> bool {
+        matches!(self, LineSpacing::Custom(_))
+    }
+
+    /// Get the custom value in pixels, if any.
+    pub fn custom_value(&self) -> Option<f32> {
+        if let LineSpacing::Custom(px) = self {
+            Some(*px)
+        } else {
+            None
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Maximum Line Width Configuration
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -2065,6 +2218,10 @@ pub struct Settings {
     /// Split ratio for the editor/preview panes (0.0 to 1.0)
     pub split_ratio: f32,
 
+    /// Spacing between editor and preview panes in split view.
+    #[serde(default)]
+    pub panel_spacing: PanelSpacing,
+
     // ─────────────────────────────────────────────────────────────────────────
     // Syntax Highlighting
     // ─────────────────────────────────────────────────────────────────────────
@@ -2289,6 +2446,11 @@ pub struct Settings {
     /// Compact = less space, Normal = default, Relaxed = more space.
     #[serde(default)]
     pub header_spacing: HeaderSpacing,
+
+    /// Line spacing for rendered markdown text.
+    /// Controls vertical spacing between lines in the preview.
+    #[serde(default)]
+    pub line_spacing: LineSpacing,
 
     /// Treat single newlines as hard line breaks in rendered view.
     /// When false (default), adjacent lines in a paragraph flow together.

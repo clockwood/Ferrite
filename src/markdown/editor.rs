@@ -45,7 +45,7 @@
 #![allow(clippy::ptr_arg)]
 #![allow(clippy::needless_range_loop)]
 
-use crate::config::{EditorFont, HeaderSpacing, MaxLineWidth, ParagraphIndent, Settings, Theme};
+use crate::config::{EditorFont, HeaderSpacing, LineSpacing, MaxLineWidth, ParagraphIndent, Settings, Theme};
 use crate::fonts;
 use crate::markdown::ast_ops::{
     exit_list_to_paragraph, heading_enter, indent_list_item, merge_with_previous_list_item,
@@ -148,7 +148,18 @@ const BLOCK_ITEM_SPACING_Y: f32 = 1.0;
 /// Extra vertical space after block-level paragraphs (and code blocks) so consecutive
 /// paragraphs are visibly separated; ~0.5em at 32px line height. Included in viewport
 /// block height measurements via `render_node` layout (not added to `BLOCK_ITEM_SPACING_Y`).
-const PARAGRAPH_TRAILING_SPACE_Y: f32 = 16.0;
+/// Now configurable via settings - use get_paragraph_trailing_space() to get the value.
+const DEFAULT_PARAGRAPH_TRAILING_SPACE_Y: f32 = 16.0;
+
+/// Get the paragraph trailing space from egui memory (set by MarkdownEditor).
+/// Falls back to default if not set.
+fn get_paragraph_trailing_space(ui: &Ui) -> f32 {
+    ui.memory(|mem| {
+        mem.data
+            .get_temp::<f32>(egui::Id::new("line_spacing"))
+            .unwrap_or(DEFAULT_PARAGRAPH_TRAILING_SPACE_Y)
+    })
+}
 
 /// Max blocks to newly measure (via full egui render) per frame during the
 /// progressive measurement pass.  Keeps first-frame cost bounded for large
@@ -169,7 +180,7 @@ struct ViewportCullingState {
     /// Y offset where each block starts (includes inter-block spacing).
     block_start_y: Vec<f32>,
     /// Rendered height of each top-level block (excludes `BLOCK_ITEM_SPACING_Y` between
-    /// blocks; includes in-flow spacing such as [`PARAGRAPH_TRAILING_SPACE_Y`] after
+    /// blocks; includes in-flow spacing such as paragraph trailing space after
     /// paragraphs and code blocks).
     block_heights: Vec<f32>,
     /// Total content height (blocks + spacing), measured from the layout.
@@ -699,6 +710,8 @@ pub struct MarkdownEditor<'a> {
     paragraph_indent: ParagraphIndent,
     /// Vertical spacing between headers in rendered view
     header_spacing: HeaderSpacing,
+    /// Line spacing for rendered text (paragraph trailing space)
+    line_spacing: LineSpacing,
     /// File context for wikilink resolution (current file dir + workspace root)
     wikilink_context: Option<WikilinkContext>,
     /// Treat soft breaks as hard line breaks in rendered view
@@ -742,6 +755,7 @@ impl<'a> MarkdownEditor<'a> {
             zen_max_column_width: 80.0,
             paragraph_indent: ParagraphIndent::Off,
             header_spacing: HeaderSpacing::default(),
+            line_spacing: LineSpacing::default(),
             wikilink_context: None,
             strict_line_breaks: false,
             search_highlights: None,
@@ -843,6 +857,13 @@ impl<'a> MarkdownEditor<'a> {
     #[must_use]
     pub fn header_spacing(mut self, spacing: HeaderSpacing) -> Self {
         self.header_spacing = spacing;
+        self
+    }
+
+    /// Set the line spacing for rendered text.
+    #[must_use]
+    pub fn line_spacing(mut self, spacing: LineSpacing) -> Self {
+        self.line_spacing = spacing;
         self
     }
 
@@ -1031,6 +1052,12 @@ impl<'a> MarkdownEditor<'a> {
         ui.memory_mut(|mem| {
             mem.data
                 .insert_temp(egui::Id::new("strict_line_breaks"), self.strict_line_breaks);
+        });
+
+        // Store line spacing in egui memory for render_node
+        ui.memory_mut(|mem| {
+            mem.data
+                .insert_temp(egui::Id::new("line_spacing"), self.line_spacing.value());
         });
 
         let code_exec_ctx = self
@@ -1869,7 +1896,7 @@ fn render_node_with_structural_keys(
                 indent_level,
                 paragraph_indent,
             );
-            ui.add_space(PARAGRAPH_TRAILING_SPACE_Y);
+            ui.add_space(get_paragraph_trailing_space(ui));
         }
         MarkdownNodeType::CodeBlock {
             language, literal, ..
@@ -2080,7 +2107,7 @@ fn render_node(
                 indent_level,
                 paragraph_indent,
             );
-            ui.add_space(PARAGRAPH_TRAILING_SPACE_Y);
+            ui.add_space(get_paragraph_trailing_space(ui));
         }
         MarkdownNodeType::CodeBlock {
             language, literal, ..

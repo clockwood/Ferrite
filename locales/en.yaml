@@ -258,6 +258,16 @@ settings:
     # Header Spacing (Markdown Rendering)
     header_spacing: "Header Spacing"
     header_spacing_hint: "Vertical spacing between headings (H1-H6) in rendered view"
+    # Panel Spacing (Split View)
+    panel_spacing: "Panel Spacing"
+    panel_spacing_hint: "Gap between editor and preview panes in split view"
+    panel_spacing_custom: "Custom"
+    panel_spacing_custom_desc: "Custom pixel width"
+    # Line Spacing (Rendered Preview)
+    line_spacing: "Line Spacing"
+    line_spacing_hint: "Vertical spacing between lines in rendered preview"
+    line_spacing_custom: "Custom"
+    line_spacing_custom_desc: "Custom pixel value"
   preview:
     sync_scroll: "Sync Scroll"
     split_sync_scroll: "Sync"
