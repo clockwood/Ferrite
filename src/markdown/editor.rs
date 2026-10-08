@@ -4450,7 +4450,7 @@ fn render_code_block(
     // Mermaid blocks get special rendering with diagram type detection
     if language.eq_ignore_ascii_case("mermaid") {
         render_mermaid_block(ui, source, edit_state, colors, font_size, literal, node);
-        ui.add_space(PARAGRAPH_TRAILING_SPACE_Y);
+        ui.add_space(get_paragraph_trailing_space(ui));
         return;
     }
 
@@ -4515,7 +4515,7 @@ fn render_code_block(
         mem.data.insert_temp(code_block_id.with("state"), code_data);
     });
 
-    ui.add_space(PARAGRAPH_TRAILING_SPACE_Y);
+    ui.add_space(get_paragraph_trailing_space(ui));
 
     // Handle changes
     if output.changed {

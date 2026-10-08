@@ -1436,6 +1436,7 @@ impl PanelSpacing {
 #[serde(rename_all = "lowercase")]
 pub enum LineSpacing {
     /// Normal spacing - 16px (default)
+    #[default]
     Normal,
     /// Relaxed spacing - 24px
     Relaxed,
@@ -2639,6 +2640,7 @@ impl Default for Settings {
             // Window State
             window_size: WindowSize::default(),
             split_ratio: 0.5,
+            panel_spacing: PanelSpacing::default(),
 
             // Syntax Highlighting
             syntax_theme: String::from("base16-ocean.dark"),
@@ -2720,6 +2722,7 @@ impl Default for Settings {
 
             // Markdown Rendering Settings
             header_spacing: HeaderSpacing::default(), // Normal by default
+            line_spacing: LineSpacing::default(),     // Normal by default
             strict_line_breaks: false,                // Standard markdown: soft breaks are spaces
 
             // Snippets Settings

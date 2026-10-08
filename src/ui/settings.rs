@@ -2061,7 +2061,7 @@ impl SettingsPanel {
                 let drag = ui.add(
                     egui::DragValue::new(px)
                         .speed(1.0)
-                        .clamp_range(4.0..=64.0)
+                        .range(4.0..=64.0)
                         .suffix(" px")
                 );
                 if drag.changed() {
@@ -2123,7 +2123,7 @@ impl SettingsPanel {
                 let drag = ui.add(
                     egui::DragValue::new(px)
                         .speed(1.0)
-                        .clamp_range(8.0..=64.0)
+                        .range(8.0..=64.0)
                         .suffix(" px")
                 );
                 if drag.changed() {
